@@ -78,8 +78,9 @@ function GraphWrapper(props) {
       .then(result => {
         const fiscalResult = result[0].data;
         const citizenshipResult = result[1].data;
+        fiscalResult.citizenshipResults = citizenshipResult;
 
-        stateSettingCallback(view, office, [fiscalResult, citizenshipResult]);
+        stateSettingCallback(view, office, [fiscalResult]);
       })
       .catch(err => {
         console.error('Error fetching Data: ', err);
