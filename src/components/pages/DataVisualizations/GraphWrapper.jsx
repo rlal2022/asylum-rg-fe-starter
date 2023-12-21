@@ -49,6 +49,7 @@ function GraphWrapper(props) {
         break;
     }
   }
+
   async function updateStateWithNewData(
     years,
     view,
@@ -57,44 +58,32 @@ function GraphWrapper(props) {
   ) {
     const API_URL = 'https://hrf-asylum-be-b.herokuapp.com/cases';
 
-    if (office === 'all' || !office) {
-      console.log('Request parameters:', { years, view, office });
-      await axios
-        .get(`${API_URL}/fiscalSummary`, {
-          // mock URL, can be simply replaced by `${Real_Production_URL}/summary` in prod!
+    const fiscalParams = {
+      from: years[0],
+      to: years[1],
+    };
 
-          params: {
-            from: years[0],
-            to: years[1],
-          },
-        })
-        .then(result => {
-          console.log('data from fiscalSummary', result.data);
+    const citizenshipParams = {
+      from: years[0],
+      to: years[1],
+      office: office,
+    };
 
-          stateSettingCallback(view, office, [result.data]); // <-- `test_data` here can be simply replaced by `result.data` in prod!
-        })
-        .catch(err => {
-          console.error(err);
-        });
-    } else {
-      console.log('request sent to citizenshipsummary');
-      await axios
-        .get(`${API_URL}/citizenshipSummary`, {
-          // mock URL, can be simply replaced by `${Real_Production_URL}/summary` in prod!
-          params: {
-            from: years[0],
-            to: years[1],
-            office: office,
-          },
-        })
-        .then(result => {
-          console.log('data from citizenship summary', result.data);
-          stateSettingCallback(view, office, [result.data]); // <-- `test_data` here can be simply replaced by `result.data` in prod!
-        })
-        .catch(err => {
-          console.error(err);
-        });
-    }
+    Promise.all([
+      await axios.get(`${API_URL}/fiscalSummary`, { fiscalParams }),
+      await axios.get(`${API_URL}/citizenshipSummary`, {
+        citizenshipParams,
+      }),
+    ])
+      .then(result => {
+        const fiscalResult = result[0].data;
+        const citizenshipResult = result[1].data;
+
+        stateSettingCallback(view, office, [fiscalResult, citizenshipResult]);
+      })
+      .catch(err => {
+        console.error('Error fetching Data: ', err);
+      });
   }
   const clearQuery = (view, office) => {
     dispatch(resetVisualizationQuery(view, office));
