@@ -16,6 +16,8 @@ import { HeaderContent } from './components/Layout/Header';
 
 // import { TablePage } from './components/pages/Table';
 
+import { Auth0Provider } from '@auth0/auth0-react';
+
 import { Layout } from 'antd';
 import GraphsContainer from './components/pages/DataVisualizations/GraphsContainer';
 import { Provider } from 'react-redux';
@@ -26,11 +28,21 @@ import { colors } from './styles/data_vis_colors';
 const { primary_accent_color } = colors;
 
 const store = configureStore({ reducer: reducer });
+
+const domain = process.env.REACT_APP_AUTH0_DOMAIN;
+const clientId = process.env.REACT_APP_AUTH0_CLIENT_ID;
+
 ReactDOM.render(
   <Router>
     <Provider store={store}>
       <React.StrictMode>
-        <App />
+        <Auth0Provider
+          domain={domain}
+          clientId={clientId}
+          redirectUri={window.location.origin}
+        >
+          <App />
+        </Auth0Provider>
       </React.StrictMode>
     </Provider>
   </Router>,
